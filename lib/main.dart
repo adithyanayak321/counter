@@ -1,48 +1,69 @@
+import 'package:bloc_architecture/bloc/counter_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
   runApp(MyApp());
 }
 
+final _counterBloc = CounterBloc();
+
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+  const MyApp({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-
-        primarySwatch: Colors.blue,
+    return BlocProvider(
+      create: (context) => _counterBloc,
+      child: MaterialApp(
+        theme: ThemeData.dark(),
+        home: Scaffold(
+          body: SafeArea(child: _counterWidgetBody(context)),
+        ),
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
+  }
+
+  Widget _counterWidgetBody(BuildContext context) {
+    return Center(
+      child: Column(
+        children: [
+          _incrementCounterWidget(context),
+          SizedBox(
+            height: 10,
+          ),
+          _decrementCounterWidget(context),
+          SizedBox(
+            height: 10,
+          ),
+          BlocBuilder<CounterBloc, CounterInitialState>(
+            builder: (context, state) {
+              return Text(_counterBloc.state.counterNumber.toString());
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _incrementCounterWidget(BuildContext context) {
+    return ElevatedButton(
+        onPressed: () {
+          _counterBloc.add(IncrementEvent());
+        },
+        child: Icon(Icons.add));
+  }
+
+  Widget _decrementCounterWidget(BuildContext context) {
+    return ElevatedButton(
+        onPressed: () {
+          _counterBloc.add(DecrementEvent());
+        },
+        child: Icon(Icons.remove));
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-
-    return Scaffold(
-
-    );
-  }
+@override
+void dispose() {
+  _counterBloc.close();
 }
